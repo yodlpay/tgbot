@@ -6,7 +6,8 @@
   "dependencies": {
     "@vercel/node": "^3.2.24",
     "dotenv-cli": "^7.4.2",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "viem": "^2.21.55"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",

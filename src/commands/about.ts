@@ -4,7 +4,10 @@ import createDebug from 'debug';
 const debug = createDebug('bot:about_command');
 
 const about = () => async (ctx: Context) => {
-  const message = `hello world`;
+  const chatId = ctx.chat?.id;
+  console.log({ chat: ctx.chat });
+  const message = `hello world\nhttps://yodl-tg.vercel.app/v1/tx?id=${chatId}`;
+
   debug(`Triggered "about" command with message \n${message}`);
   await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });
 };
