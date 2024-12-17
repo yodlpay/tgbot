@@ -1,11 +1,10 @@
 import { Telegraf } from 'telegraf';
 
 import { about } from './commands';
-import { greeting } from './text';
 import { VercelRequest, VercelResponse } from '@vercel/node';
+
 import { development, production } from './core';
 import { URLSearchParams } from 'url';
-import { Address } from 'cluster';
 import { Hex, verifyMessage } from 'viem';
 import assert = require('assert');
 
