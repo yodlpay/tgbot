@@ -4,7 +4,10 @@ import { subscribe } from './subscribe';
 import { list } from './list';
 
 // Helper to create context with minimal mocking
-const createTestContext = (messageText: string, chatId: number = 123): Partial<Context> => ({
+const createTestContext = (
+  messageText: string,
+  chatId: number = 123,
+): Partial<Context> => ({
   // @ts-ignore
   chat: { id: chatId },
   // @ts-ignore
@@ -27,7 +30,6 @@ describe('subscribe command - system tests', () => {
     await prisma.$disconnect();
   });
 
-
   it('should handle simplified subscription format', async () => {
     // Arrange
     testCtx = createTestContext('/subscribe bob.eth');
@@ -42,7 +44,7 @@ describe('subscribe command - system tests', () => {
       groupId: '123',
       to: 'bob.eth',
       from: null,
-      status: 'success'
+      status: 'success',
     });
     expect(testCtx.reply).toHaveBeenCalledWith('Subscription created');
   });
@@ -61,14 +63,16 @@ describe('subscribe command - system tests', () => {
       groupId: '123',
       to: 'bob.eth',
       from: null,
-      status: 'success'
+      status: 'success',
     });
     expect(testCtx.reply).toHaveBeenCalledWith('Subscription created');
   });
 
   it('should store subscription with all parameters', async () => {
     // Arrange
-    testCtx = createTestContext('/subscribe to:bob.eth from:alice.eth status:final');
+    testCtx = createTestContext(
+      '/subscribe to:bob.eth from:alice.eth status:final',
+    );
 
     // Act
     await subscribe()(testCtx as Context);
@@ -80,7 +84,7 @@ describe('subscribe command - system tests', () => {
       groupId: '123',
       to: 'bob.eth',
       from: 'alice.eth',
-      status: 'final'
+      status: 'final',
     });
   });
 
@@ -94,7 +98,9 @@ describe('subscribe command - system tests', () => {
     // Assert
     const subscriptions = await prisma.subscriptions.findMany();
     expect(subscriptions).toHaveLength(0);
-    expect(testCtx.reply).toHaveBeenCalledWith('Invalid status. Must be one of: success, semifinal, final');
+    expect(testCtx.reply).toHaveBeenCalledWith(
+      'Invalid status. Must be one of: success, semifinal, final',
+    );
   });
 
   it('should handle multiple subscriptions for same group', async () => {
@@ -108,13 +114,12 @@ describe('subscribe command - system tests', () => {
 
     // Assert
     const subscriptions = await prisma.subscriptions.findMany({
-      orderBy: { to: 'asc' }
+      orderBy: { to: 'asc' },
     });
     expect(subscriptions).toHaveLength(2);
     expect(subscriptions[0].to).toBe('alice.eth');
     expect(subscriptions[1].to).toBe('bob.eth');
   });
-
 
   it('should handle multiple subscriptions for same group', async () => {
     // Arrange
@@ -129,13 +134,12 @@ describe('subscribe command - system tests', () => {
 
     // Assert
     expect(ctxList.reply).toHaveBeenCalledWith(
-      expect.stringContaining('alice.eth')
+      expect.stringContaining('alice.eth'),
     );
     expect(ctxList.reply).toHaveBeenCalledWith(
-      expect.stringContaining('bob.eth')
+      expect.stringContaining('bob.eth'),
     );
   });
-
 
   it('should lowercase all commands', async () => {
     // Arrange
@@ -150,10 +154,10 @@ describe('subscribe command - system tests', () => {
 
     // Assert
     expect(ctxList.reply).toHaveBeenCalledWith(
-      expect.stringContaining('to:alice.eth')
+      expect.stringContaining('to:alice.eth'),
     );
     expect(ctxList.reply).toHaveBeenCalledWith(
-      expect.stringContaining('to:bob.eth')
+      expect.stringContaining('to:bob.eth'),
     );
   });
-}); 
+});

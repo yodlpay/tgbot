@@ -5,11 +5,11 @@ import { handleTransaction } from '..';
 
 const debug = createDebug('bot:trigger_command');
 
-/*** 
- * Examples: 
+/***
+ * Examples:
  * /trigger 0x0
- * 
- * @returns 
+ *
+ * @returns
  */
 
 const trigger = () => async (ctx: Context) => {
@@ -22,14 +22,14 @@ const trigger = () => async (ctx: Context) => {
   const text = ctx.message?.text?.toLowerCase();
   const args = text.split(' ').slice(1);
 
-  const txHash = args[0]
+  const txHash = args[0];
 
   if (!txHash) {
     await ctx.reply('Please provide txHash. Example: /trigger 0x0');
     return;
   }
   try {
-    await handleTransaction(txHash)
+    await handleTransaction(txHash);
     await ctx.reply('Transaction triggered');
   } catch (error) {
     await ctx.reply('Error triggering transaction. Please try again.');

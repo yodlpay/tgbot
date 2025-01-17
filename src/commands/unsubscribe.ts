@@ -7,6 +7,8 @@ const debug = createDebug('bot:about_command');
 
 const unsubscribe = () => async (ctx: Context) => {
   const chatId = ctx.chat?.id;
+  const topicId = ctx.message?.message_thread_id?.toString();
+
   if (!chatId) {
     await ctx.reply('Error: Could not determine chat ID');
     return;
@@ -15,7 +17,7 @@ const unsubscribe = () => async (ctx: Context) => {
   // @ts-ignore
   const text = ctx.message?.text?.toLowerCase();
   const args = text.split(' ').slice(1);
-  const params = args.join(" "); // Get everything after /subscribe
+  const params = args.join(' '); // Get everything after /subscribe
 
   if (_.isEmpty(args)) {
     await ctx.reply('Please provide parameters. Example: /unsubscribe bob.eth');
@@ -23,29 +25,31 @@ const unsubscribe = () => async (ctx: Context) => {
   }
 
   let toMatch;
-  if (args[0]?.includes(":")) {
+  if (args[0]?.includes(':')) {
     toMatch = params.match(/to:([^\s]+)/)[1];
   } else {
-    toMatch = args[0]
+    toMatch = args[0];
   }
 
-  if (toMatch === 'all') {
+  if (toMatch == 'all') {
     await prisma.subscriptions.deleteMany({
       where: {
-        groupId: chatId.toString()
-      }
+        groupId: chatId.toString(),
+        topicId: topicId ? topicId.toString() : null,
+      },
     });
   } else {
     await prisma.subscriptions.deleteMany({
       where: {
         groupId: chatId.toString(),
-        to: toMatch
-      }
-    })
+        topicId: topicId ? topicId.toString() : null,
+        to: toMatch,
+      },
+    });
 
     const message = `Subscription deleted`;
     await ctx.reply(message);
-  };
-}
+  }
+};
 
 export { unsubscribe };

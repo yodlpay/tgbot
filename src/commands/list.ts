@@ -5,28 +5,31 @@ import _ = require('lodash');
 
 const debug = createDebug('bot:list_command');
 
-/*** 
- * Examples: 
- * 
- * /list 
- * 
- * @returns 
+/***
+ * Examples:
+ *
+ * /list
+ *
+ * @returns
  */
 
 const list = () => async (ctx: Context) => {
   const chatId = ctx.chat?.id;
+  const topicId = ctx.message?.message_thread_id;
+
   if (!chatId) {
     await ctx.reply('Error: Could not determine chat ID');
     return;
   }
 
-  let subscriptions = []
+  let subscriptions = [];
   // Create subscription
   try {
     subscriptions = await prisma.subscriptions.findMany({
       where: {
-        groupId: chatId.toString()
-      }
+        groupId: chatId.toString(),
+        topicId: topicId ? topicId.toString() : null,
+      },
     });
 
     if (_.isEmpty(subscriptions)) {
@@ -34,13 +37,21 @@ const list = () => async (ctx: Context) => {
       return;
     }
 
-    const list = subscriptions.map((sub: any) => {
-      const params = []
-      if (sub.to) { params.push(`${sub.to}`) }
-      if (sub.from) { params.push(`from:${sub.to}`) }
-      if (sub.status && sub.status != "success") { params.push(`status:${sub.status}`) }
-      return `- \`${params.join(" ")}\``
-    }).join('\n');
+    const list = subscriptions
+      .map((sub: any) => {
+        const params = [];
+        if (sub.to) {
+          params.push(`${sub.to}`);
+        }
+        if (sub.from) {
+          params.push(`from:${sub.to}`);
+        }
+        if (sub.status && sub.status != 'success') {
+          params.push(`status:${sub.status}`);
+        }
+        return `- \`${params.join(' ')}\``;
+      })
+      .join('\n');
 
     const message = `Subscriptions:\n${list}`;
     await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });

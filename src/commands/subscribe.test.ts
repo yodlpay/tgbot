@@ -7,13 +7,16 @@ jest.mock('../prisma', () => ({
   prisma: {
     subscriptions: {
       create: jest.fn(),
-      findFirst: jest.fn()
+      findFirst: jest.fn(),
     },
   },
 }));
 
 // Helper to create mock context
-const createMockContext = (messageText: string, chatId: number = 123): Partial<Context> => ({
+const createMockContext = (
+  messageText: string,
+  chatId: number = 123,
+): Partial<Context> => ({
   // @ts-ignore
   chat: { id: chatId },
   // @ts-ignore
@@ -39,8 +42,8 @@ describe('subscribe command', () => {
         groupId: '123',
         to: 'bob.eth',
         from: null,
-        status: 'success'
-      })
+        status: 'success',
+      }),
     });
     expect(mockCtx.reply).toHaveBeenCalledWith('Subscription created');
   });
@@ -55,15 +58,16 @@ describe('subscribe command', () => {
         groupId: '123',
         to: 'bob.eth',
         from: null,
-        status: 'success'
-      })
+        status: 'success',
+      }),
     });
     expect(mockCtx.reply).toHaveBeenCalledWith('Subscription created');
   });
 
-
   it('should create a subscription with all parameters', async () => {
-    mockCtx = createMockContext('/subscribe to:bob.eth from:alice.eth status:final');
+    mockCtx = createMockContext(
+      '/subscribe to:bob.eth from:alice.eth status:final',
+    );
 
     await subscribe()(mockCtx as Context);
 
@@ -72,8 +76,8 @@ describe('subscribe command', () => {
         groupId: '123',
         to: 'bob.eth',
         from: 'alice.eth',
-        status: 'final'
-      })
+        status: 'final',
+      }),
     });
     expect(mockCtx.reply).toHaveBeenCalledWith('Subscription created');
   });
@@ -84,7 +88,9 @@ describe('subscribe command', () => {
     await subscribe()(mockCtx as Context);
 
     expect(prisma.subscriptions.create).not.toHaveBeenCalled();
-    expect(mockCtx.reply).toHaveBeenCalledWith('Invalid status. Must be one of: success, semifinal, final');
+    expect(mockCtx.reply).toHaveBeenCalledWith(
+      'Invalid status. Must be one of: success, semifinal, final',
+    );
   });
 
   it('should handle missing parameters', async () => {
@@ -93,15 +99,21 @@ describe('subscribe command', () => {
     await subscribe()(mockCtx as Context);
 
     expect(prisma.subscriptions.create).not.toHaveBeenCalled();
-    expect(mockCtx.reply).toHaveBeenCalledWith('Please provide subscription parameters. Example: /subscribe to:bob.eth');
+    expect(mockCtx.reply).toHaveBeenCalledWith(
+      'Please provide subscription parameters. Example: /subscribe to:bob.eth',
+    );
   });
 
   it('should handle prisma errors', async () => {
     mockCtx = createMockContext('/subscribe to:bob.eth');
-    (prisma.subscriptions.create as jest.Mock).mockRejectedValueOnce(new Error('DB Error'));
+    (prisma.subscriptions.create as jest.Mock).mockRejectedValueOnce(
+      new Error('DB Error'),
+    );
 
     await subscribe()(mockCtx as Context);
 
-    expect(mockCtx.reply).toHaveBeenCalledWith('Error creating subscription. Please try again.');
+    expect(mockCtx.reply).toHaveBeenCalledWith(
+      'Error creating subscription. Please try again.',
+    );
   });
 });

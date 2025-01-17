@@ -11,13 +11,15 @@ model Subscriptions {
   id String @id @default(cuid())
   
   groupId String
+  topicId String?
+
   from String?
   to String?
   status String @default("success")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([groupId, from, to, status])
 }
 

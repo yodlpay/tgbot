@@ -23,7 +23,8 @@ bot.command('list', list());
 bot.command('trigger', trigger());
 
 // Currently hardcoded. Alternatively lookup address of `webhooks.yodl.eth`
-const YODL_WEBHOOK_ADDRESS = "0x66a31Aa400dd8C11f9af054c3b7bCcB783B4901B" as Hex;
+const YODL_WEBHOOK_ADDRESS =
+  '0x66a31Aa400dd8C11f9af054c3b7bCcB783B4901B' as Hex;
 
 //prod mode (Vercel)
 export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
@@ -32,12 +33,15 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
       if (!req.headers) return;
       console.log(`POST ${req.url}`);
 
-      const signature = req.headers["x-yodl-signature"] as Hex;
-      const addressShort = req.headers["x-yodl-address"] as Hex;
+      const signature = req.headers['x-yodl-signature'] as Hex;
+      const addressShort = req.headers['x-yodl-address'] as Hex;
 
-      assert(signature, "Signature is required");
+      assert(signature, 'Signature is required');
       assert(signature, addressShort);
-      assert(YODL_WEBHOOK_ADDRESS.startsWith(addressShort), "Invalid signing address");
+      assert(
+        YODL_WEBHOOK_ADDRESS.startsWith(addressShort),
+        'Invalid signing address',
+      );
 
       const isValidSignature = await verifyMessage({
         // This is buggy, should tap into raw request body instead:
@@ -48,7 +52,7 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
       });
 
       if (!isValidSignature) {
-        return res.status(401).send({ message: "Invalid signature" });
+        return res.status(401).send({ message: 'Invalid signature' });
       }
 
       await handleTransaction(req.body.txHash);
@@ -76,28 +80,51 @@ export async function handleTransaction(txHash: Hex) {
   const { receiverAddress, receiverEnsPrimaryName } = payment;
 
   if (isSpam(payment)) {
-    console.log("Rejected spam payment", payment);
+    console.log('Rejected spam payment', payment);
     return;
   }
 
-  const subscriptions = await findByReceiver(receiverEnsPrimaryName, receiverAddress);
+  const subscriptions = await findByReceiver(
+    receiverEnsPrimaryName,
+    receiverAddress,
+  );
 
   const promises = subscriptions.map(async (subscription: any) => {
     const msg = `Payment received: https://yodl.me/tx/${txHash}`;
-    const result = await bot.telegram.sendMessage(subscription.groupId, msg);
+    const opts: any = {};
+    if (subscription.topicId) {
+      opts.message_thread_id = subscription.topicId;
+    }
+
+    const result = await bot.telegram.sendMessage(
+      subscription.groupId,
+      msg,
+      opts,
+    );
     return {
       subscription,
       groupId: subscription.groupId,
       msg,
-      result
-    }
+      result,
+    };
   });
 
   return await Promise.all(promises);
 }
 
-const STABLECOINS_WHITELIST = ["USDC", "USDT", "DAI", "USDGLO", "USDC.e", "USDT.e", "DAI.e", "USDM", "FRAX", "CRVUSD"];
-const SPAM_THRESHOLD = 0.01
+const STABLECOINS_WHITELIST = [
+  'USDC',
+  'USDT',
+  'DAI',
+  'USDGLO',
+  'USDC.e',
+  'USDT.e',
+  'DAI.e',
+  'USDM',
+  'FRAX',
+  'CRVUSD',
+];
+const SPAM_THRESHOLD = 0.01;
 
 function isSpam(payment: PaymentSimple) {
   if (!STABLECOINS_WHITELIST.includes(payment.tokenOutSymbol)) {
@@ -106,15 +133,15 @@ function isSpam(payment: PaymentSimple) {
   }
 
   if (Number(payment.tokenOutAmountGross) < SPAM_THRESHOLD) {
-    console.log(`tokenOutAmountGross is below spam threshold:`, payment.tokenOutAmountGross);
+    console.log(
+      `tokenOutAmountGross is below spam threshold:`,
+      payment.tokenOutAmountGross,
+    );
     return true;
   }
 
   return false;
 }
-
-
-
 
 //dev mode
 ENVIRONMENT !== 'production' && development(bot);
