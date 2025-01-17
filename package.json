@@ -36,6 +36,8 @@
     "prettier": "prettier --write 'src/**/*.ts'",
     "lint": "tsc --noemit",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   }
 }
