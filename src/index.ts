@@ -22,6 +22,7 @@ bot.command('unsubscribe', unsubscribe());
 bot.command('list', list());
 bot.command('trigger', trigger());
 
+// Currently hardcoded. Alternatively lookup address of `webhooks.yodl.eth`
 const YODL_WEBHOOK_ADDRESS = "0x66a31Aa400dd8C11f9af054c3b7bCcB783B4901B" as Hex;
 
 //prod mode (Vercel)
