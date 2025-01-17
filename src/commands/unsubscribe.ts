@@ -1,14 +1,51 @@
 import { Context } from 'telegraf';
 import createDebug from 'debug';
+import _ = require('lodash');
+import { prisma } from '../prisma';
 
 const debug = createDebug('bot:about_command');
 
 const unsubscribe = () => async (ctx: Context) => {
   const chatId = ctx.chat?.id;
-  const message = `Add following option to your yodl config:\n\`\`\`json\n{\n  ...\n  "webhooks" : ["https://tg.yodl.me/v1/tx?id=${chatId}"]\n}\n\`\`\``;
+  if (!chatId) {
+    await ctx.reply('Error: Could not determine chat ID');
+    return;
+  }
 
-  debug(`Triggered "about" command with message \n${message}`);
-  await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });
-};
+  // @ts-ignore
+  const text = ctx.message?.text?.toLowerCase();
+  const args = text.split(' ').slice(1);
+  const params = args.join(" "); // Get everything after /subscribe
+
+  if (_.isEmpty(args)) {
+    await ctx.reply('Please provide parameters. Example: /unsubscribe bob.eth');
+    return;
+  }
+
+  let toMatch;
+  if (args[0]?.includes(":")) {
+    toMatch = params.match(/to:([^\s]+)/)[1];
+  } else {
+    toMatch = args[0]
+  }
+
+  if (toMatch === 'all') {
+    await prisma.subscriptions.deleteMany({
+      where: {
+        groupId: chatId.toString()
+      }
+    });
+  } else {
+    await prisma.subscriptions.deleteMany({
+      where: {
+        groupId: chatId.toString(),
+        to: toMatch
+      }
+    })
+
+    const message = `Subscription deleted`;
+    await ctx.reply(message);
+  };
+}
 
 export { unsubscribe };

@@ -4,10 +4,18 @@ import createDebug from 'debug';
 const debug = createDebug('bot:about_command');
 
 const about = () => async (ctx: Context) => {
-  const chatId = ctx.chat?.id;
-  const message = `Add following option to your yodl config:\n\`\`\`json\n{\n  ...\n  "webhooks" : ["https://tg.yodl.me/v1/tx?id=${chatId}"]\n}\n\`\`\``;
+  const message = `Yodl bot notifies when a payment happens.
 
-  debug(`Triggered "about" command with message \n${message}`);
+  To subscribe to a payment, use the following command:
+  \`\`\`/subscribe <to>\`\`\`
+
+  To unsubscribe from a payment, use the following command:
+  \`\`\`/unsubscribe <to>\`\`\`
+
+  To list all subscriptions, use the following command:
+  \`\`\`/list\`\`\`
+  `;
+
   await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });
 };
 

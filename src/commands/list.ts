@@ -1,6 +1,7 @@
 import { Context } from 'telegraf';
 import createDebug from 'debug';
 import { prisma } from '../prisma';
+import _ = require('lodash');
 
 const debug = createDebug('bot:list_command');
 
@@ -28,12 +29,23 @@ const list = () => async (ctx: Context) => {
       }
     });
 
-    const list = subscriptions.map((sub: any) => `\`to:${sub.to}\``).join('\n');
+    if (_.isEmpty(subscriptions)) {
+      await ctx.reply('No subscriptions');
+      return;
+    }
 
-    const message = `Subscriptions: ${list}`;
-    await ctx.reply(message);
+    const list = subscriptions.map((sub: any) => {
+      const params = []
+      if (sub.to) { params.push(`${sub.to}`) }
+      if (sub.from) { params.push(`from:${sub.to}`) }
+      if (sub.status && sub.status != "success") { params.push(`status:${sub.status}`) }
+      return `- \`${params.join(" ")}\``
+    }).join('\n');
+
+    const message = `Subscriptions:\n${list}`;
+    await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });
   } catch (error) {
-    await ctx.reply('Error creating subscription. Please try again.');
+    await ctx.reply(`Error finding subscriptions. Please try again. ${error}`);
   }
 };
 

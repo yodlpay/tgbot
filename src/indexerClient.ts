@@ -28,8 +28,6 @@ export type PaymentSimple = {
   tokenOutSymbol: string;
   tokenOutAddress: string;
   tokenOutAmountGross: string;
-  tokenOutAmountGrossNumber: number;
-  tokenOutAmountGrossDn: string;
   receiverAddress: string;
   receiverEnsPrimaryName: string;
   senderAddress: string;

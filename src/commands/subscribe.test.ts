@@ -19,6 +19,7 @@ const createMockContext = (messageText: string, chatId: number = 123): Partial<C
   // @ts-ignore
   message: { text: messageText },
   reply: jest.fn(),
+  replyWithMarkdownV2: jest.fn(),
 });
 
 describe('subscribe command', () => {

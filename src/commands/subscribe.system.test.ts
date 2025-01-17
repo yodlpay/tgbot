@@ -10,6 +10,7 @@ const createTestContext = (messageText: string, chatId: number = 123): Partial<C
   // @ts-ignore
   message: { text: messageText },
   reply: jest.fn(),
+  replyWithMarkdownV2: jest.fn(),
 });
 
 describe('subscribe command - system tests', () => {
@@ -128,10 +129,10 @@ describe('subscribe command - system tests', () => {
 
     // Assert
     expect(ctxList.reply).toHaveBeenCalledWith(
-      expect.stringContaining('to:alice.eth')
+      expect.stringContaining('alice.eth')
     );
     expect(ctxList.reply).toHaveBeenCalledWith(
-      expect.stringContaining('to:bob.eth')
+      expect.stringContaining('bob.eth')
     );
   });
 

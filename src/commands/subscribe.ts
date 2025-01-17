@@ -28,9 +28,14 @@ const subscribe = () => async (ctx: Context) => {
   // @ts-ignore
   const text = ctx.message?.text?.toLowerCase();
   const args = text.split(' ').slice(1);
-  const params = text.split(' ').slice(1).join(" "); // Get everything after /subscribe
+  const params = args.join(" "); // Get everything after /subscribe
 
-  debug(params, text)
+  // Match pattern: [to:]<address> [from:<address>] [status:<status>]
+  const pattern = /^(?:(?:to:)?([^\s]+))?\s*(?:from:([^\s]+))?\s*(?:status:([^\s]+))?$/;
+  if (!params.match(pattern)) {
+    await ctx.reply('Invalid command. Example: /subscribe to:bob.eth');
+    return;
+  }
 
   if (!params) {
     await ctx.reply('Please provide subscription parameters. Example: /subscribe to:bob.eth');
@@ -47,7 +52,6 @@ const subscribe = () => async (ctx: Context) => {
   // Parse parameter
   const fromMatch = params.match(/from:([^\s]+)/);
   const statusMatch = params.match(/status:([^\s]+)/);
-
 
   // If no explicit parameters are provided, treat the entire params as 'to'
   const to = toMatch;
@@ -70,20 +74,27 @@ const subscribe = () => async (ctx: Context) => {
         status
       }
     })
+
     if (existingSubscription) {
-      console.log({ existingSubscription })
-      await ctx.reply('Subscription already exists');
+      await ctx.reply('Subscription exists already');
       return;
     }
-
-    await prisma.subscriptions.create({
-      data: {
-        groupId: chatId.toString(),
-        from,
-        to,
-        status
+    try {
+      await prisma.subscriptions.create({
+        data: {
+          groupId: chatId.toString(),
+          from,
+          to: to.toLowerCase(),
+          status
+        }
+      });
+    } catch (error: any) {
+      if (error.code === 'P2002') { // Prisma unique constraint violation code
+        await ctx.reply('Subscription already exists');
+        return;
       }
-    });
+      throw error; // Re-throw other errors to be caught by outer try-catch
+    }
 
     const message = `Subscription created`;
     await ctx.reply(message);

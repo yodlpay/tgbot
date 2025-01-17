@@ -6,9 +6,9 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { development, production } from './core';
 import { Hex, verifyMessage } from 'viem';
 import assert = require('assert');
-import { prisma } from './prisma';
+import { findByReceiver, prisma } from './prisma';
 import { list } from './commands/list';
-import { fetchPaymentByTxHash } from './indexerClient';
+import { fetchPaymentByTxHash, PaymentSimple } from './indexerClient';
 import _ = require('lodash');
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
@@ -50,7 +50,7 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
         return res.status(401).send({ message: "Invalid signature" });
       }
 
-      handleTransaction(req.body.txHash);
+      await handleTransaction(req.body.txHash);
 
       // const queryString = req.url?.split('?')[1] || '';
       // const params = new URLSearchParams(queryString);
@@ -72,23 +72,14 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
 
 export async function handleTransaction(txHash: Hex) {
   const { payment } = await fetchPaymentByTxHash(txHash);
-
-  console.log("payment", payment);
-
   const { receiverAddress, receiverEnsPrimaryName } = payment;
 
-  const toParam = _.compact([receiverAddress.toLowerCase(), receiverEnsPrimaryName?.toLowerCase()])
+  if (isSpam(payment)) {
+    console.log("Spam payment", payment);
+    return;
+  }
 
-  const subscriptions = await prisma.subscriptions.findMany({
-    where: {
-      to: { in: toParam }
-    }
-  });
-
-  const allsubscriptions = await prisma.subscriptions.findMany();
-  console.log(allsubscriptions)
-
-  console.log({ toParam, subscriptions });
+  const subscriptions = await findByReceiver(receiverEnsPrimaryName, receiverAddress);
 
   const promises = subscriptions.map(async (subscription: any) => {
     const msg = `Payment received: https://yodl.me/tx/${txHash}`;
@@ -103,6 +94,18 @@ export async function handleTransaction(txHash: Hex) {
 
   return await Promise.all(promises);
 }
+
+const STABLECOINS_WHITELIST = ["USDC", "USDT", "DAI", "USDGLO", "USDC.e", "USDT.e", "DAI.e", "USDM", "FRAX", "CRVUSD"];
+
+function isSpam(payment: PaymentSimple) {
+  if (!STABLECOINS_WHITELIST.includes(payment.tokenOutSymbol)) {
+    console.log("Not stablecoin", payment.tokenOutSymbol);
+    return false;
+  }
+
+  return Number(payment.tokenOutAmountGross) <= 0.01;
+}
+
 
 
 
