@@ -1,0 +1,49 @@
+import { Telegraf } from 'telegraf';
+import { subscribe } from './commands';
+import { handleTransaction } from './index';
+import { prisma } from './prisma';
+
+describe('Subscription and Payment Flow', () => {
+  const TEST_GROUP_ID = "-1002437707079";
+  let bot: Telegraf;
+
+  beforeAll(async () => {
+    // Initialize real bot with test token
+    bot = new Telegraf(process.env.BOT_TOKEN!);
+
+    // Clean test data
+    await prisma.subscriptions.deleteMany({
+      where: { groupId: TEST_GROUP_ID }
+    });
+  });
+
+  afterAll(async () => {
+    // Cleanup
+    await prisma.subscriptions.deleteMany({
+      where: { groupId: TEST_GROUP_ID }
+    });
+  });
+
+  it('should process subscription and payment notification', async () => {
+    // 1. Simulate /subscribe command
+    const subscribeCtx = {
+      chat: { id: TEST_GROUP_ID },
+      message: { text: '/subscribe 100usdglo.yodl.eth' },
+      reply: jest.fn()
+    };
+
+    await subscribe()(subscribeCtx as any);
+
+    const subscriptions = await prisma.subscriptions.findMany();
+    expect(subscriptions).toHaveLength(1);
+
+    // 2. Trigger transaction handling with real tx
+    const txHash = '0xabfdcaf6df51e1c545f5ceda1238bdce5e7953aa3b297e0d6c49729e362a6b56';
+    const result = await handleTransaction(txHash);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].msg).toBe(`Payment received: https://yodl.me/tx/${txHash}`);
+    expect(result[0].groupId).toBe(TEST_GROUP_ID);
+    expect(result[0].subscription.to).toBe('100usdglo.yodl.eth');
+  });
+});

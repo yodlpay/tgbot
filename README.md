@@ -1,34 +1,24 @@
-# Telegram Bot Vercel Boilerplate
+# Yodl Telegram Bot
 
-Telegram Bot Vercel Boilerplate based on Node.js and [Telegraf](https://github.com/telegraf/telegraf) framework.
+Telegram bot for yodl.me. This bot receives a webhook everytime a yodl payment happens.
 
-This template inspired by [Telegram Bot Boilerplate](https://github.com/yakovlevyuri/telegram-bot-boilerplate) for easily deploy to [Vercel](https://vercel.com).
+Telegram users can add the telegram bot and subscribe to be notified when a payment happens.
 
-[![Live Demo](https://img.shields.io/badge/Medium-12100E?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@7rodma/deploy-a-serverless-telegram-chatbot-using-vercel-57665d942a58)
+## Commands
 
-## Before you start
+- `/subscribe RECEIVER` - Subscribe to a payment
+- `/unsubscribe RECEIVER` - Unsubscribe from a payment
+- `/list` - List all subscriptions
 
-First rename `.env-sample` file to `.env` and fill in all necessary values.
+## subscribe command
 
-```
-BOT_TOKEN="<YOUR_BOT_API_TOKEN>"
-```
+`/subscribe [to:]receiver [from:sender] [status:(success|semifinal|final)]`
 
-## Start your local server
+### Examples
 
-```
-yarn
-yarn dev
-```
+- `/subscribe 0xAddress`
+- `/subscribe vitalik.eth`
 
-## Production
+Which is equivalant to:
 
-You can fork this template and do the necessary changes you need. Then you when are done with your changes simply goto [vercel git import](https://vercel.com/import/git).
-
-Reference to [this update](https://vercel.com/docs/security/deployment-protection#migrating-to-standard-protection), you need turn off `Vercel Authentication`, Settings => Deployment Protection
-
-Feel free to create PR!
-
-## Demo
-
-You can see a working version of the bot at [@Node_api_m_bot](https://t.me/Node_api_m_bot)
+- `/subscribe to:vitalik.eth`
