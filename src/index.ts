@@ -30,6 +30,7 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
   try {
     if (req.url && req.url.startsWith('/v1/tx') && req.method === 'POST') {
       if (!req.headers) return;
+      console.log(`POST ${req.url}`);
 
       const signature = req.headers["x-yodl-signature"] as Hex;
       const addressShort = req.headers["x-yodl-address"] as Hex;
@@ -58,7 +59,6 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
       // if (groupId) {
       //   await bot.telegram.sendMessage(groupId, `payment arrived https://yodl.me/tx/${req.body.txHash}`);
       // }
-
       // curl "https://yodl-tg.vercel.app/v1/tx?id=-1002437707079" -X POST -d '{"txHash":"0xd873efc81150f79c4eb68033341f09640bb1259db68aece385002dab6ce3bc37","chainId":100}' -H "Content-Type: application/json"
       res.status(200).send('OK');
     } else {
@@ -71,6 +71,7 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
 };
 
 export async function handleTransaction(txHash: Hex) {
+  console.log(`handleTransaction ${txHash}`);
   const { payment } = await fetchPaymentByTxHash(txHash);
   const { receiverAddress, receiverEnsPrimaryName } = payment;
 
