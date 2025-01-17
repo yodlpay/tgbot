@@ -39,6 +39,6 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy"
+    "vercel-build": "prisma generate && prisma migrate deploy && ncc build src/index.ts -o public -m"
   }
 }
