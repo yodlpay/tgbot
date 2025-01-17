@@ -76,7 +76,7 @@ export async function handleTransaction(txHash: Hex) {
   const { receiverAddress, receiverEnsPrimaryName } = payment;
 
   if (isSpam(payment)) {
-    console.log("Spam payment", payment);
+    console.log("Rejected spam payment", payment);
     return;
   }
 
@@ -97,14 +97,20 @@ export async function handleTransaction(txHash: Hex) {
 }
 
 const STABLECOINS_WHITELIST = ["USDC", "USDT", "DAI", "USDGLO", "USDC.e", "USDT.e", "DAI.e", "USDM", "FRAX", "CRVUSD"];
+const SPAM_THRESHOLD = 0.01
 
 function isSpam(payment: PaymentSimple) {
   if (!STABLECOINS_WHITELIST.includes(payment.tokenOutSymbol)) {
-    console.log("Not stablecoin", payment.tokenOutSymbol);
-    return false;
+    console.log(`tokenOutSymbol not whitelisted:`, payment.tokenOutSymbol);
+    return true;
   }
 
-  return Number(payment.tokenOutAmountGross) <= 0.01;
+  if (Number(payment.tokenOutAmountGross) < SPAM_THRESHOLD) {
+    console.log(`tokenOutAmountGross is below spam threshold:`, payment.tokenOutAmountGross);
+    return true;
+  }
+
+  return false;
 }
 
 
