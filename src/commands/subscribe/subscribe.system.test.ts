@@ -46,7 +46,9 @@ describe('subscribe command - system tests', () => {
       from: null,
       status: 'success',
     });
-    expect(testCtx.reply).toHaveBeenCalledWith('Subscription created');
+    expect(testCtx.reply).toHaveBeenCalledWith(
+      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+    );
   });
 
   it('should store subscription in database with basic parameters', async () => {
@@ -65,7 +67,9 @@ describe('subscribe command - system tests', () => {
       from: null,
       status: 'success',
     });
-    expect(testCtx.reply).toHaveBeenCalledWith('Subscription created');
+    expect(testCtx.reply).toHaveBeenCalledWith(
+      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+    );
   });
 
   it('should store subscription with all parameters', async () => {

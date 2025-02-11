@@ -6,16 +6,24 @@ export const createSubscription = async ({
   to,
   from = null,
   status = 'success',
+  caller = 'command',
 }: {
   chatId: number;
   topicId?: number;
   to?: string;
   from?: string | null;
   status?: string;
+  caller?: 'command' | 'wizard';
 }) => {
   // Validate that either to or from is present
+
+  const callerToErrorMessage = {
+    command:
+      'Please provide subscription parameters. Example: /subscribe to:bob.eth',
+    wizard: 'Either "to" or "from" must be specified',
+  };
   if (!to && !from) {
-    throw new Error('Either "to" or "from" must be specified');
+    throw new Error(callerToErrorMessage[caller]);
   }
 
   // Validate status

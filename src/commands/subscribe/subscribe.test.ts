@@ -3,7 +3,7 @@ import { prisma } from '../../prisma';
 import { subscribe } from './command';
 
 // Mock prisma client
-jest.mock('../prisma', () => ({
+jest.mock('../../prisma', () => ({
   prisma: {
     subscriptions: {
       create: jest.fn(),
@@ -45,7 +45,9 @@ describe('subscribe command', () => {
         status: 'success',
       }),
     });
-    expect(mockCtx.reply).toHaveBeenCalledWith('Subscription created');
+    expect(mockCtx.reply).toHaveBeenCalledWith(
+      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+    );
   });
 
   it('should create a subscription with implicit "to" parameter', async () => {
@@ -61,7 +63,9 @@ describe('subscribe command', () => {
         status: 'success',
       }),
     });
-    expect(mockCtx.reply).toHaveBeenCalledWith('Subscription created');
+    expect(mockCtx.reply).toHaveBeenCalledWith(
+      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+    );
   });
 
   it('should create a subscription with all parameters', async () => {
@@ -79,7 +83,9 @@ describe('subscribe command', () => {
         status: 'final',
       }),
     });
-    expect(mockCtx.reply).toHaveBeenCalledWith('Subscription created');
+    expect(mockCtx.reply).toHaveBeenCalledWith(
+      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+    );
   });
 
   it('should reject invalid status parameter', async () => {
