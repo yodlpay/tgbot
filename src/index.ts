@@ -1,26 +1,49 @@
-import { Telegraf } from 'telegraf';
-
-import { about, subscribe, trigger, unsubscribe } from './commands';
+import { Telegraf, Scenes, session } from 'telegraf';
 import { VercelRequest, VercelResponse } from '@vercel/node';
-
-import { development, production } from './core';
 import { Hex, verifyMessage } from 'viem';
-import assert = require('assert');
-import { findByReceiver, prisma } from './prisma';
-import { list } from './commands/list';
-import { fetchPaymentByTxHash, PaymentSimple } from './indexerClient';
 import _ = require('lodash');
+import assert = require('assert');
+import {
+  about,
+  subscribe,
+  subscribeWizard,
+  trigger,
+  unsubscribe,
+  unsubscribeWizard,
+  start,
+  menu,
+  handleMenuCallbacks,
+  list,
+} from './commands';
+import { development, production } from './core';
+import { findByReceiver, prisma } from './prisma';
+import { fetchPaymentByTxHash, PaymentSimple } from './indexerClient';
+import { MyContext } from './types';
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const ENVIRONMENT = process.env.NODE_ENV || '';
 
-const bot = new Telegraf(BOT_TOKEN);
+const bot = new Telegraf<MyContext>(BOT_TOKEN);
 
+const stage = new Scenes.Stage<MyContext>(
+  [subscribeWizard, unsubscribeWizard],
+  { ttl: 10 },
+);
+
+bot.use(session());
+bot.use(stage.middleware());
+
+bot.command('start', start());
 bot.command('about', about());
 bot.command('subscribe', subscribe());
 bot.command('unsubscribe', unsubscribe());
 bot.command('list', list());
 bot.command('trigger', trigger());
+bot.command('menu', menu());
+bot.action(
+  ['menu_subscribe', 'menu_unsubscribe', 'menu_list'],
+  handleMenuCallbacks(),
+);
 
 // Currently hardcoded. Alternatively lookup address of `webhooks.yodl.eth`
 const YODL_WEBHOOK_ADDRESS =

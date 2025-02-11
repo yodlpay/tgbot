@@ -37,23 +37,18 @@ const list = () => async (ctx: Context) => {
       return;
     }
 
+    // TODOD: truncate if address.
     const list = subscriptions
       .map((sub: any) => {
-        const params = [];
-        if (sub.to) {
-          params.push(`${sub.to}`);
-        }
-        if (sub.from) {
-          params.push(`from:${sub.to}`);
-        }
-        if (sub.status && sub.status != 'success') {
-          params.push(`status:${sub.status}`);
-        }
-        return `- \`${params.join(' ')}\``;
+        const to = sub.to || '-';
+        const from = sub.from || '-';
+        const status = sub.status || '-';
+        return `\`${to.padEnd(15)} ${from.padEnd(15)} ${status.padEnd(10)}\``;
       })
       .join('\n');
 
-    const message = `Subscriptions:\n${list}`;
+    const header = `\`${'To'.padEnd(15)} ${'From'.padEnd(15)} ${'Status'.padEnd(10)}\`\n`;
+    const message = `Subscriptions:\n${header}${list}`;
     await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });
   } catch (error) {
     await ctx.reply(`Error finding subscriptions. Please try again. ${error}`);

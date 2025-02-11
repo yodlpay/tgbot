@@ -1,6 +1,6 @@
 import { Context } from 'telegraf';
-import { prisma } from '../prisma';
-import { subscribe } from './subscribe';
+import { prisma } from '../../prisma';
+import { subscribe } from './command';
 
 // Mock prisma client
 jest.mock('../prisma', () => ({

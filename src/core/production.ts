@@ -1,7 +1,8 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import createDebug from 'debug';
-import { Context, Telegraf } from 'telegraf';
+import { Telegraf } from 'telegraf';
 import { Update } from 'telegraf/typings/core/types/typegram';
+import { MyContext } from '../types';
 
 const debug = createDebug('bot:dev');
 
@@ -11,7 +12,7 @@ const WEBHOOK_URL = `${process.env.WEBHOOK_URL}`;
 const production = async (
   req: VercelRequest,
   res: VercelResponse,
-  bot: Telegraf<Context<Update>>,
+  bot: Telegraf<MyContext>,
 ) => {
   debug('Bot runs in production mode');
   debug(`setting webhook: ${WEBHOOK_URL}`);

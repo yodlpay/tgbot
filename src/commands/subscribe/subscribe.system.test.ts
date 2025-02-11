@@ -1,7 +1,7 @@
 import { Context } from 'telegraf';
-import { prisma } from '../prisma';
-import { subscribe } from './subscribe';
-import { list } from './list';
+import { prisma } from '../../prisma';
+import { subscribe } from './command';
+import { list } from '../list';
 
 // Helper to create context with minimal mocking
 const createTestContext = (
