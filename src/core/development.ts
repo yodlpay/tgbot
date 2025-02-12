@@ -4,7 +4,6 @@ import { MyContext } from '../types';
 
 const debug = createDebug('bot:dev');
 
-// const development = async (bot: Telegraf<Context<Update>>) => {
 const development = async (bot: Telegraf<MyContext>) => {
   const botInfo = (await bot.telegram.getMe()).username;
 
