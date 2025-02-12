@@ -3,7 +3,7 @@ import createDebug from 'debug';
 import { list } from './list';
 import { MyContext } from '../types';
 
-const debug = createDebug('bot:about_command');
+const debug = createDebug('bot:menu_command');
 
 const menu = () => async (ctx: Context) => {
   const message = 'Manage your subscriptions';
