@@ -37,19 +37,27 @@ const list = () => async (ctx: Context) => {
       return;
     }
 
-    // TODOD: truncate if address.
-    const list = subscriptions
-      .map((sub: any) => {
-        const to = sub.to || '-';
-        const from = sub.from || '-';
-        const status = sub.status || '-';
-        return `\`${to.padEnd(15)} ${from.padEnd(15)} ${status.padEnd(10)}\``;
-      })
-      .join('\n');
+    const toSubs = subscriptions
+      .filter((sub) => sub.to)
+      .map((sub) => sub.to)
+      .filter((addr): addr is string => !!addr)
+      .map((addr) => `\`${addr}\``);
 
-    const header = `\`${'To'.padEnd(15)} ${'From'.padEnd(15)} ${'Status'.padEnd(10)}\`\n`;
-    const message = `Subscriptions:\n${header}${list}`;
-    await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });
+    const fromSubs = subscriptions
+      .filter((sub) => sub.from)
+      .map((sub) => sub.from)
+      .filter((addr): addr is string => !!addr)
+      .map((addr) => `\`${addr}\``);
+
+    const message = [
+      `*Subscriptions*\n\n`,
+      toSubs.length ? `*To:*\n${toSubs.join('\n')}\n\n` : '',
+      fromSubs.length ? `*From:*\n${fromSubs.join('\n')}\n\n` : '',
+    ]
+      .filter(Boolean)
+      .join('');
+
+    await ctx.replyWithMarkdownV2(message.replace(/\./g, '\\.'));
   } catch (error) {
     await ctx.reply(`Error finding subscriptions. Please try again. ${error}`);
   }

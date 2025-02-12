@@ -3,7 +3,7 @@ import { createSubscription } from './helpers';
 import { MyContext } from '../../types';
 
 const skipButton = { text: '⏭️ Skip', callback_data: 'skip' };
-const abortButton = { text: '🚫 Abort', callback_data: 'abort' };
+const cancelButton = { text: '🚫 Cancel', callback_data: 'cancel' };
 
 const STATUS_OPTIONS = ['success', 'semifinal', 'final'] as const;
 
@@ -15,22 +15,20 @@ const statusKeyboard = {
         { text: 'Semifinal', callback_data: 'semifinal' },
         { text: 'Final', callback_data: 'final' },
       ],
-      [abortButton],
+      [cancelButton],
     ],
   },
 };
 
 const defaultKeyboard = {
   reply_markup: {
-    inline_keyboard: [[skipButton, abortButton]],
+    inline_keyboard: [[skipButton, cancelButton]],
   },
 };
 
-const handleClickAbort = async (ctx: MyContext, action: string) => {
-  if (action === 'abort') {
-    await ctx.reply('Subscription cancelled');
-    return ctx.scene.leave();
-  }
+const handleClickCancel = async (ctx: MyContext) => {
+  await ctx.reply('Operation cancelled');
+  return ctx.scene.leave();
 };
 
 const handleAddressInput = async (ctx: MyContext, field: 'to' | 'from') => {
@@ -39,7 +37,10 @@ const handleAddressInput = async (ctx: MyContext, field: 'to' | 'from') => {
     const action = ctx.callbackQuery.data as string;
     await ctx.answerCbQuery();
 
-    await handleClickAbort(ctx, action);
+    if (action === 'cancel') {
+      await handleClickCancel(ctx);
+      return true;
+    }
 
     if (action === 'skip') {
       ctx.scene.session.subscribeData[field] = undefined;
@@ -48,6 +49,7 @@ const handleAddressInput = async (ctx: MyContext, field: 'to' | 'from') => {
     const value = ctx.message.text.trim();
     ctx.scene.session.subscribeData[field] = value;
   }
+  return false;
 };
 
 export const subscribeWizard = new Scenes.WizardScene<MyContext>(
@@ -63,7 +65,8 @@ export const subscribeWizard = new Scenes.WizardScene<MyContext>(
   },
   // Step 2: Handle 'to' and ask for 'from'
   async (ctx) => {
-    await handleAddressInput(ctx, 'to');
+    const cancelled = await handleAddressInput(ctx, 'to');
+    if (cancelled) return;
 
     await ctx.reply(
       'Enter an ENS name or address to subscribe FROM:',
@@ -73,7 +76,8 @@ export const subscribeWizard = new Scenes.WizardScene<MyContext>(
   },
   // Step 3: Handle 'from' and ask for 'status'
   async (ctx) => {
-    await handleAddressInput(ctx, 'from');
+    const cancelled = await handleAddressInput(ctx, 'from');
+    if (cancelled) return;
 
     const { to, from } = ctx.scene.session.subscribeData;
     if (!to && !from) {
@@ -97,11 +101,19 @@ export const subscribeWizard = new Scenes.WizardScene<MyContext>(
     const action = ctx.callbackQuery.data;
     await ctx.answerCbQuery();
 
-    await handleClickAbort(ctx, action);
+    if (action === 'cancel') {
+      await handleClickCancel(ctx);
+      return;
+    }
 
     if (!STATUS_OPTIONS.includes(action as any)) {
       await ctx.reply('Invalid status. Please select one of the options above');
       return;
+    }
+
+    // Initialize subscribeData if it doesn't exist
+    if (!ctx.scene.session.subscribeData) {
+      ctx.scene.session.subscribeData = {};
     }
 
     ctx.scene.session.subscribeData.status = action;
@@ -112,7 +124,6 @@ export const subscribeWizard = new Scenes.WizardScene<MyContext>(
     }
 
     const { to, from, status = 'success' } = ctx.scene.session.subscribeData;
-    console.log('Creating subscription with:', { chatId, to, from, status });
 
     await createSubscription({
       ctx,

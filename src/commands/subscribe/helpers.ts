@@ -55,7 +55,8 @@ export const createSubscription = async ({
     });
 
     if (existingSubscription) {
-      throw new Error('Subscription already exists');
+      await ctx.reply('Subscription exists already');
+      return;
     }
 
     try {

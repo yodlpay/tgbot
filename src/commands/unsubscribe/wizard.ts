@@ -2,7 +2,7 @@ import { Scenes } from 'telegraf';
 import { MyContext } from '../../types';
 import { prisma } from '../../prisma';
 
-const abortButton = { text: '🚫 Abort', callback_data: 'abort' };
+const cancelButton = { text: '🚫 Cancel', callback_data: 'cancel' };
 const allButton = { text: '🗑️ Delete All', callback_data: 'all' };
 
 export const unsubscribeWizard = new Scenes.WizardScene<MyContext>(
@@ -26,12 +26,12 @@ export const unsubscribeWizard = new Scenes.WizardScene<MyContext>(
         inline_keyboard: [
           ...subscriptions.map((sub) => [
             {
-              text: `🔕 ${sub.to || sub.from}`,
+              text: `🔕 ${sub.to ? sub.to + ' ⏭️ ' : sub.from + ' ⏮️ '}`,
               callback_data: sub.to || sub.from || '',
             },
           ]),
           [allButton],
-          [abortButton],
+          [cancelButton],
         ],
       },
     };
@@ -50,7 +50,7 @@ export const unsubscribeWizard = new Scenes.WizardScene<MyContext>(
     const action = ctx.callbackQuery.data;
     await ctx.answerCbQuery();
 
-    if (action === 'abort') {
+    if (action === 'cancel') {
       await ctx.reply('Operation cancelled');
       return ctx.scene.leave();
     }
@@ -68,7 +68,7 @@ export const unsubscribeWizard = new Scenes.WizardScene<MyContext>(
           inline_keyboard: [
             [
               { text: '✅ Yes, delete all', callback_data: 'confirm_all' },
-              { text: '❌ No, cancel', callback_data: 'abort' },
+              { text: '❌ No, cancel', callback_data: 'cancel' },
             ],
           ],
         },
@@ -107,7 +107,7 @@ export const unsubscribeWizard = new Scenes.WizardScene<MyContext>(
     const action = ctx.callbackQuery.data;
     await ctx.answerCbQuery();
 
-    if (action === 'abort') {
+    if (action === 'cancel') {
       await ctx.reply('Operation cancelled');
       return ctx.scene.leave();
     }
