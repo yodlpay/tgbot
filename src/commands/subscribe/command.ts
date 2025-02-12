@@ -1,7 +1,7 @@
-import { Context } from 'telegraf';
 import { createSubscription } from './helpers';
+import { MyContext } from '../../types';
 
-export const subscribe = () => async (ctx: Context) => {
+export const subscribe = () => async (ctx: MyContext) => {
   const chatId = ctx.chat?.id;
   const topicId = ctx.message?.message_thread_id;
 
@@ -23,6 +23,13 @@ export const subscribe = () => async (ctx: Context) => {
     return;
   }
 
+  if (!params) {
+    await ctx.reply(
+      'Please provide subscription parameters. Example: /subscribe to:bob.eth',
+    );
+    return;
+  }
+
   let toMatch;
   if (args[0]?.includes(':')) {
     toMatch = params.match(/to:([^\s]+)/)?.[1];
@@ -30,27 +37,21 @@ export const subscribe = () => async (ctx: Context) => {
     toMatch = args[0];
   }
 
+  // Parse parameter
   const fromMatch = params.match(/from:([^\s]+)/);
   const statusMatch = params.match(/status:([^\s]+)/);
 
+  // If no explicit parameters are provided, treat the entire params as 'to'
   const to = toMatch;
   const from = fromMatch ? fromMatch[1] : null;
   const status = statusMatch ? statusMatch[1] : 'success';
 
-  try {
-    await createSubscription({
-      chatId,
-      topicId,
-      to,
-      from,
-      status,
-    });
-    await ctx.reply(
-      `✅ Subscription to ${to} created\n\nTo see all your subscriptions: /list`,
-    );
-  } catch (error: any) {
-    await ctx.reply(
-      error.message || 'Error creating subscription. Please try again.',
-    );
-  }
+  await createSubscription({
+    ctx,
+    chatId,
+    topicId,
+    to,
+    from,
+    status,
+  });
 };

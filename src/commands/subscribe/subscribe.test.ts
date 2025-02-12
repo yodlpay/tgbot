@@ -1,6 +1,7 @@
-import { Context } from 'telegraf';
 import { prisma } from '../../prisma';
 import { subscribe } from './command';
+import { MyContext } from '../../types';
+import { getSuccessMessage } from './helpers';
 
 // Mock prisma client
 jest.mock('../../prisma', () => ({
@@ -16,7 +17,7 @@ jest.mock('../../prisma', () => ({
 const createMockContext = (
   messageText: string,
   chatId: number = 123,
-): Partial<Context> => ({
+): Partial<MyContext> => ({
   // @ts-ignore
   chat: { id: chatId },
   // @ts-ignore
@@ -26,7 +27,7 @@ const createMockContext = (
 });
 
 describe('subscribe command', () => {
-  let mockCtx: Partial<Context>;
+  let mockCtx: Partial<MyContext>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,7 +36,7 @@ describe('subscribe command', () => {
   it('should create a subscription with "to" parameter', async () => {
     mockCtx = createMockContext('/subscribe to:bob.eth');
 
-    await subscribe()(mockCtx as Context);
+    await subscribe()(mockCtx as MyContext);
 
     expect(prisma.subscriptions.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -46,14 +47,14 @@ describe('subscribe command', () => {
       }),
     });
     expect(mockCtx.reply).toHaveBeenCalledWith(
-      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+      getSuccessMessage('success', 'bob.eth'),
     );
   });
 
   it('should create a subscription with implicit "to" parameter', async () => {
     mockCtx = createMockContext('/subscribe bob.eth');
 
-    await subscribe()(mockCtx as Context);
+    await subscribe()(mockCtx as MyContext);
 
     expect(prisma.subscriptions.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -64,7 +65,7 @@ describe('subscribe command', () => {
       }),
     });
     expect(mockCtx.reply).toHaveBeenCalledWith(
-      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+      getSuccessMessage('success', 'bob.eth'),
     );
   });
 
@@ -73,7 +74,7 @@ describe('subscribe command', () => {
       '/subscribe to:bob.eth from:alice.eth status:final',
     );
 
-    await subscribe()(mockCtx as Context);
+    await subscribe()(mockCtx as MyContext);
 
     expect(prisma.subscriptions.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
@@ -84,14 +85,14 @@ describe('subscribe command', () => {
       }),
     });
     expect(mockCtx.reply).toHaveBeenCalledWith(
-      '✅ Subscription to bob.eth created\n\nTo see all your subscriptions: /list',
+      getSuccessMessage('final', 'bob.eth', 'alice.eth'),
     );
   });
 
   it('should reject invalid status parameter', async () => {
     mockCtx = createMockContext('/subscribe to:bob.eth status:invalid');
 
-    await subscribe()(mockCtx as Context);
+    await subscribe()(mockCtx as MyContext);
 
     expect(prisma.subscriptions.create).not.toHaveBeenCalled();
     expect(mockCtx.reply).toHaveBeenCalledWith(
@@ -102,7 +103,7 @@ describe('subscribe command', () => {
   it('should handle missing parameters', async () => {
     mockCtx = createMockContext('/subscribe');
 
-    await subscribe()(mockCtx as Context);
+    await subscribe()(mockCtx as MyContext);
 
     expect(prisma.subscriptions.create).not.toHaveBeenCalled();
     expect(mockCtx.reply).toHaveBeenCalledWith(
@@ -116,7 +117,7 @@ describe('subscribe command', () => {
       new Error('DB Error'),
     );
 
-    await subscribe()(mockCtx as Context);
+    await subscribe()(mockCtx as MyContext);
 
     expect(mockCtx.reply).toHaveBeenCalledWith(
       'Error creating subscription. Please try again.',

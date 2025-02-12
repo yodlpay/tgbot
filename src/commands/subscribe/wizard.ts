@@ -106,41 +106,22 @@ export const subscribeWizard = new Scenes.WizardScene<MyContext>(
 
     ctx.scene.session.subscribeData.status = action;
 
-    try {
-      const chatId = ctx.chat?.id;
-      if (!chatId) {
-        throw new Error('Could not determine chat ID');
-      }
-
-      const { to, from, status = 'success' } = ctx.scene.session.subscribeData;
-      console.log('Creating subscription with:', { chatId, to, from, status });
-
-      await createSubscription({
-        chatId,
-        topicId: ctx.message?.message_thread_id,
-        to,
-        from,
-        status,
-        caller: 'wizard',
-      });
-
-      const subscriptionDetails = [
-        to ? `TO: ${to}` : '',
-        from ? `FROM: ${from}` : '',
-        `STATUS: ${status}`,
-      ]
-        .filter(Boolean)
-        .join('\n');
-
-      await ctx.reply(
-        `✅ Subscription created:\n${subscriptionDetails}\n\nTo see all your subscriptions: /list`,
-      );
-    } catch (error: any) {
-      console.error('Subscription error:', error);
-      await ctx.reply(
-        error.message || '🔴 Error creating subscription. Please try again.',
-      );
+    const chatId = ctx.chat?.id;
+    if (!chatId) {
+      throw new Error('Could not determine chat ID');
     }
+
+    const { to, from, status = 'success' } = ctx.scene.session.subscribeData;
+    console.log('Creating subscription with:', { chatId, to, from, status });
+
+    await createSubscription({
+      ctx,
+      chatId,
+      topicId: ctx.message?.message_thread_id,
+      to,
+      from,
+      status,
+    });
 
     return ctx.scene.leave();
   },
