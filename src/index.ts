@@ -96,24 +96,29 @@ export async function handleTransaction(txHash: Hex) {
   console.log('fetch subscriptions result', subscriptions);
 
   const promises = subscriptions.map(async (subscription: any) => {
-    const msg = `Payment received: https://yodl.me/tx/${txHash}`;
-    const opts: any = {};
-    if (subscription.topicId) {
-      opts.message_thread_id = subscription.topicId;
+    try {
+      const msg = `Payment received: https://yodl.me/tx/${txHash}`;
+      const opts: any = {};
+      if (subscription.topicId) {
+        opts.message_thread_id = subscription.topicId;
+      }
+
+      const result = await bot.telegram.sendMessage(
+        subscription.groupId,
+        msg,
+        opts,
+      );
+
+      return {
+        subscription,
+        groupId: subscription.groupId,
+        msg,
+        result,
+      };
+    } catch (err) {
+      console.log('error', err);
+      return false;
     }
-
-    const result = await bot.telegram.sendMessage(
-      subscription.groupId,
-      msg,
-      opts,
-    );
-
-    return {
-      subscription,
-      groupId: subscription.groupId,
-      msg,
-      result,
-    };
   });
 
   console.log('promises done');
