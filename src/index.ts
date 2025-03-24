@@ -84,10 +84,14 @@ export async function handleTransaction(txHash: Hex) {
     return;
   }
 
+  console.log('fetch subscriptions');
+
   const subscriptions = await findByReceiver(
     receiverEnsPrimaryName,
     receiverAddress,
   );
+
+  console.log('fetch subscriptions result', subscriptions);
 
   const promises = subscriptions.map(async (subscription: any) => {
     const msg = `Payment received: https://yodl.me/tx/${txHash}`;
@@ -101,6 +105,7 @@ export async function handleTransaction(txHash: Hex) {
       msg,
       opts,
     );
+
     return {
       subscription,
       groupId: subscription.groupId,
@@ -109,7 +114,13 @@ export async function handleTransaction(txHash: Hex) {
     };
   });
 
-  return await Promise.all(promises);
+  console.log('promises done');
+
+  const resp = await Promise.all(promises);
+
+  console.log('promises awaited');
+
+  return resp;
 }
 
 const STABLECOINS_WHITELIST = [
