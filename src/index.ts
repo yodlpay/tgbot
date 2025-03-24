@@ -56,7 +56,7 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
       }
 
       await handleTransaction(req.body.txHash);
-
+      console.log('handleTransaction done');
       // const queryString = req.url?.split('?')[1] || '';
       // const params = new URLSearchParams(queryString);
       // const groupId = params.get('id');
@@ -65,11 +65,13 @@ export const startVercel = async (req: VercelRequest, res: VercelResponse) => {
       // }
       // curl "https://yodl-tg.vercel.app/v1/tx?id=-1002437707079" -X POST -d '{"txHash":"0xd873efc81150f79c4eb68033341f09640bb1259db68aece385002dab6ce3bc37","chainId":100}' -H "Content-Type: application/json"
       res.status(200).send('OK');
+      console.log('res status set to 200');
     } else {
       // telegram webhooks:
       await production(req, res, bot);
     }
   } catch (error) {
+    console.log('error happened', error);
     await prisma.$disconnect();
   }
 };
