@@ -131,7 +131,17 @@ export async function handleTransaction(txHash: Hex) {
   return resp;
 }
 
-const CURRENCY_WHITELIST = ['USD', 'EUR', 'CHF', 'GBP'];
+const CURRENCY_WHITELIST = [
+  'USD',
+  'EUR',
+  'CHF',
+  'CAD',
+  'AUD',
+  'SGD',
+  'GBP',
+  'JPY',
+  'CNY',
+];
 
 const SPAM_THRESHOLD = 0.01;
 
