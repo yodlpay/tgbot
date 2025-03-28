@@ -137,10 +137,9 @@ const CURRENCY_WHITELIST = [
   'CHF',
   'CAD',
   'AUD',
+  'NZD',
   'SGD',
   'GBP',
-  'JPY',
-  'CNY',
 ];
 
 const SPAM_THRESHOLD = 0.01;
