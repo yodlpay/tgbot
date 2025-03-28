@@ -37,24 +37,27 @@ const list = () => async (ctx: Context) => {
       return;
     }
 
-    const list = subscriptions
-      .map((sub: any) => {
-        const params = [];
-        if (sub.to) {
-          params.push(`${sub.to}`);
-        }
-        if (sub.from) {
-          params.push(`from:${sub.to}`);
-        }
-        if (sub.status && sub.status != 'success') {
-          params.push(`status:${sub.status}`);
-        }
-        return `- \`${params.join(' ')}\``;
-      })
-      .join('\n');
+    const toSubs = subscriptions
+      .filter((sub) => sub.to)
+      .map((sub) => sub.to)
+      .filter((addr): addr is string => !!addr)
+      .map((addr) => `\`${addr}\``);
 
-    const message = `Subscriptions:\n${list}`;
-    await ctx.replyWithMarkdownV2(message, { parse_mode: 'Markdown' });
+    const fromSubs = subscriptions
+      .filter((sub) => sub.from)
+      .map((sub) => sub.from)
+      .filter((addr): addr is string => !!addr)
+      .map((addr) => `\`${addr}\``);
+
+    const message = [
+      `*Subscriptions*\n\n`,
+      toSubs.length ? `*To:*\n${toSubs.join('\n')}\n\n` : '',
+      fromSubs.length ? `*From:*\n${fromSubs.join('\n')}\n\n` : '',
+    ]
+      .filter(Boolean)
+      .join('');
+
+    await ctx.replyWithMarkdownV2(message.replace(/\./g, '\\.'));
   } catch (error) {
     await ctx.reply(`Error finding subscriptions. Please try again. ${error}`);
   }

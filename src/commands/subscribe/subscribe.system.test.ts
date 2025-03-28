@@ -1,13 +1,14 @@
-import { Context } from 'telegraf';
-import { prisma } from '../prisma';
-import { subscribe } from './subscribe';
-import { list } from './list';
+import { prisma } from '../../prisma';
+import { subscribe } from './command';
+import { list } from '../list';
+import { MyContext } from '../../types';
+import { getSuccessMessage } from './helpers';
 
 // Helper to create context with minimal mocking
 const createTestContext = (
   messageText: string,
   chatId: number = 123,
-): Partial<Context> => ({
+): Partial<MyContext> => ({
   // @ts-ignore
   chat: { id: chatId },
   // @ts-ignore
@@ -17,7 +18,7 @@ const createTestContext = (
 });
 
 describe('subscribe command - system tests', () => {
-  let testCtx: Partial<Context>;
+  let testCtx: Partial<MyContext>;
 
   // Clean up database before each test
   beforeEach(async () => {
@@ -35,7 +36,7 @@ describe('subscribe command - system tests', () => {
     testCtx = createTestContext('/subscribe bob.eth');
 
     // Act
-    await subscribe()(testCtx as Context);
+    await subscribe()(testCtx as MyContext);
 
     // Assert
     const subscriptions = await prisma.subscriptions.findMany();
@@ -46,7 +47,9 @@ describe('subscribe command - system tests', () => {
       from: null,
       status: 'success',
     });
-    expect(testCtx.reply).toHaveBeenCalledWith('Subscription created');
+    expect(testCtx.reply).toHaveBeenCalledWith(
+      getSuccessMessage('success', 'bob.eth'),
+    );
   });
 
   it('should store subscription in database with basic parameters', async () => {
@@ -54,7 +57,7 @@ describe('subscribe command - system tests', () => {
     testCtx = createTestContext('/subscribe to:bob.eth');
 
     // Act
-    await subscribe()(testCtx as Context);
+    await subscribe()(testCtx as MyContext);
 
     // Assert
     const subscriptions = await prisma.subscriptions.findMany();
@@ -65,7 +68,9 @@ describe('subscribe command - system tests', () => {
       from: null,
       status: 'success',
     });
-    expect(testCtx.reply).toHaveBeenCalledWith('Subscription created');
+    expect(testCtx.reply).toHaveBeenCalledWith(
+      getSuccessMessage('success', 'bob.eth'),
+    );
   });
 
   it('should store subscription with all parameters', async () => {
@@ -75,7 +80,7 @@ describe('subscribe command - system tests', () => {
     );
 
     // Act
-    await subscribe()(testCtx as Context);
+    await subscribe()(testCtx as MyContext);
 
     // Assert
     const subscriptions = await prisma.subscriptions.findMany();
@@ -93,7 +98,7 @@ describe('subscribe command - system tests', () => {
     testCtx = createTestContext('/subscribe to:bob.eth status:invalid');
 
     // Act
-    await subscribe()(testCtx as Context);
+    await subscribe()(testCtx as MyContext);
 
     // Assert
     const subscriptions = await prisma.subscriptions.findMany();
@@ -109,8 +114,8 @@ describe('subscribe command - system tests', () => {
     const ctx2 = createTestContext('/subscribe to:alice.eth', 123);
 
     // Act
-    await subscribe()(ctx1 as Context);
-    await subscribe()(ctx2 as Context);
+    await subscribe()(ctx1 as MyContext);
+    await subscribe()(ctx2 as MyContext);
 
     // Assert
     const subscriptions = await prisma.subscriptions.findMany({
@@ -128,9 +133,9 @@ describe('subscribe command - system tests', () => {
     const ctxList = createTestContext('/list', 123);
 
     // Act
-    await subscribe()(ctx1 as Context);
-    await subscribe()(ctx2 as Context);
-    await list()(ctxList as Context);
+    await subscribe()(ctx1 as MyContext);
+    await subscribe()(ctx2 as MyContext);
+    await list()(ctxList as MyContext);
 
     // Assert
     expect(ctxList.reply).toHaveBeenCalledWith(
@@ -148,9 +153,9 @@ describe('subscribe command - system tests', () => {
     const ctxList = createTestContext('/list', 123);
 
     // Act
-    await subscribe()(ctx1 as Context);
-    await subscribe()(ctx2 as Context);
-    await list()(ctxList as Context);
+    await subscribe()(ctx1 as MyContext);
+    await subscribe()(ctx2 as MyContext);
+    await list()(ctxList as MyContext);
 
     // Assert
     expect(ctxList.reply).toHaveBeenCalledWith(
