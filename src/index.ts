@@ -141,11 +141,18 @@ const STABLECOINS_WHITELIST = [
   'USDM',
   'FRAX',
   'CRVUSD',
+  'xDAI',
+  'wxDAI',
+  'EURe',
 ];
 const SPAM_THRESHOLD = 0.01;
 
 function isSpam(payment: PaymentSimple) {
-  if (!STABLECOINS_WHITELIST.includes(payment.tokenOutSymbol)) {
+  if (
+    !STABLECOINS_WHITELIST.some(
+      (token) => token.toUpperCase() === payment.tokenOutSymbol.toUpperCase(),
+    )
+  ) {
     console.log(`tokenOutSymbol not whitelisted:`, payment.tokenOutSymbol);
     return true;
   }
