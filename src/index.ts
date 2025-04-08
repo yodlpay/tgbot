@@ -10,6 +10,7 @@ import { findByReceiver, prisma } from './prisma';
 import { list } from './commands/list';
 import { fetchPaymentByTxHash, PaymentSimple } from './indexerClient';
 import _ = require('lodash');
+import { tokenlist } from '@yodlpay/tokenlists';
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const ENVIRONMENT = process.env.NODE_ENV || '';
@@ -130,23 +131,30 @@ export async function handleTransaction(txHash: Hex) {
   return resp;
 }
 
-const STABLECOINS_WHITELIST = [
-  'USDC',
-  'USDT',
-  'DAI',
-  'USDGLO',
-  'USDC.e',
-  'USDT.e',
-  'DAI.e',
-  'USDM',
-  'FRAX',
-  'CRVUSD',
+const CURRENCY_WHITELIST = [
+  'USD',
+  'EUR',
+  'CHF',
+  'CAD',
+  'AUD',
+  'NZD',
+  'SGD',
+  'GBP',
 ];
+
 const SPAM_THRESHOLD = 0.01;
 
 function isSpam(payment: PaymentSimple) {
-  if (!STABLECOINS_WHITELIST.includes(payment.tokenOutSymbol)) {
-    console.log(`tokenOutSymbol not whitelisted:`, payment.tokenOutSymbol);
+  // check that symbol is in tokenlists and that it's a USD-ish stablecoin
+  if (
+    !tokenlist.some(
+      (token) =>
+        token.currency &&
+        CURRENCY_WHITELIST.includes(token.currency) &&
+        token.symbol.toUpperCase() === payment.tokenOutSymbol.toUpperCase(),
+    )
+  ) {
+    console.log(`tokenOutSymbol not supported:`, payment.tokenOutSymbol);
     return true;
   }
 
