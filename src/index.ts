@@ -140,6 +140,7 @@ const CURRENCY_WHITELIST = [
   'NZD',
   'SGD',
   'GBP',
+  'BRL',
 ];
 
 const SPAM_THRESHOLD = 0.01;
