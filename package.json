@@ -6,7 +6,7 @@
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "@vercel/node": "^3.2.24",
-    "@yodlpay/tokenlists": "^0.8.13",
+    "@yodlpay/tokenlists": "^0.8.15",
     "dnum": "^2.14.0",
     "dotenv": "^16.4.7",
     "dotenv-cli": "^7.4.2",
