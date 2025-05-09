@@ -1056,10 +1056,10 @@
     json-schema-to-ts "1.6.4"
     ts-morph "12.0.0"
 
-"@yodlpay/tokenlists@^0.8.13":
-  version "0.8.13"
-  resolved "https://registry.yarnpkg.com/@yodlpay/tokenlists/-/tokenlists-0.8.13.tgz#a1a521579a509551d06536d3458ede2d86843a88"
-  integrity sha512-KJGP0kr427afuFtgYRzTYcbKOPwx1mD1nTqkr8P9rOLJJcNZRpyV5g5bO/hzYd+/ZENUO7nqEQEdGGBMNwMs8A==
+"@yodlpay/tokenlists@^0.8.15":
+  version "0.8.15"
+  resolved "https://registry.yarnpkg.com/@yodlpay/tokenlists/-/tokenlists-0.8.15.tgz#d378f480a359b79600916fbd3a106794f47224c2"
+  integrity sha512-Bg8pNzxthTWQ0PDczzfSeO7PWYc7grG4COi8vDsNqLfPLQmAondjq9aL8cUcXfsHmlvkfHGk20+TqLV+MFYu+w==
 
 abbrev@1:
   version "1.1.1"
